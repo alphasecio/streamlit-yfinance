@@ -7,9 +7,10 @@ st.set_page_config(page_title="Financial Analysis", layout="wide")
 with st.sidebar:
     st.title("Financial Analysis")
     ticker = st.text_input("Enter a stock ticker (e.g. AAPL)", "AAPL")
+    period = st.selectbox("Enter a time frame", ("1D", "5D", "1M", "6M", "YTD", "1Y", "5Y"), index=2)
     button = st.button("Submit")
 
-# Format market cap and enterprise value into a readable value
+# Format market cap and enterprise value into something readable
 def format_value(value):
     suffixes = ["", "K", "M", "B", "T"]
     suffix_index = 0
@@ -29,32 +30,51 @@ if button:
                 stock = yf.Ticker(ticker)
                 info = stock.info
 
+                st.subheader(f"{ticker} - {info.get('longName', 'N/A')}")
+
+                # Plot historical stock price data
+                if period == "1D":
+                    history = stock.history(period="1d", interval="1h")
+                elif period == "5D":
+                    history = stock.history(period="5d", interval="1d")
+                elif period == "1M":
+                    history = stock.history(period="1mo", interval="1d")
+                elif period == "6M":
+                    history = stock.history(period="6mo", interval="1wk")
+                elif period == "YTD":
+                    history = stock.history(period="ytd", interval="1mo")
+                elif period == "1Y":
+                    history = stock.history(period="1y", interval="1mo")
+                elif period == "5Y":
+                    history = stock.history(period="5y", interval="3mo")
+                
+                chart_data = pd.DataFrame(history["Close"])
+                st.line_chart(chart_data)
+
                 col1, col2, col3 = st.columns(3)
 
                 # Display stock information as a dataframe
-                col1.write("<h2 style='font-size: 20px;'>Stock Information</h2>", unsafe_allow_html=True)
-                company = info.get('longName', 'N/A')
                 country = info.get('country', 'N/A')
                 sector = info.get('sector', 'N/A')
                 industry = info.get('industry', 'N/A')
                 market_cap = info.get('marketCap', 'N/A')
                 ent_value = info.get('enterpriseValue', 'N/A')
+                employees = info.get('fullTimeEmployees', 'N/A')
 
                 stock_info = [
-                    ("Metric", "Value"),
-                    ("Company Name", company),
+                    ("Stock Info", "Value"),
                     ("Country", country),
                     ("Sector", sector),
                     ("Industry", industry),
                     ("Market Cap", format_value(market_cap)),
-                    ("Enterprise Value", format_value(ent_value))
+                    ("Enterprise Value", format_value(ent_value)),
+                    ("Employees", employees)
                 ]
                 
                 df = pd.DataFrame(stock_info[1:], columns=stock_info[0])
                 col1.dataframe(df, width=400, hide_index=True)
-
+                
                 # Display price information as a dataframe
-                col2.write("<h2 style='font-size: 20px;'>Price Information</h2>", unsafe_allow_html=True)
                 current_price = info.get('currentPrice', 'N/A')
                 prev_close = info.get('previousClose', 'N/A')
                 day_high = info.get('dayHigh', 'N/A')
@@ -63,7 +83,7 @@ if button:
                 ft_week_low = info.get('fiftyTwoWeekLow', 'N/A')
                 
                 price_info = [
-                    ("Metric", "Value"),
+                    ("Price Info", "Value"),
                     ("Current Price", f"${current_price:.2f}"),
                     ("Previous Close", f"${prev_close:.2f}"),
                     ("Day High", f"${day_high:.2f}"),
@@ -76,7 +96,6 @@ if button:
                 col2.dataframe(df, width=400, hide_index=True)
 
                 # Display business metrics as a dataframe
-                col3.write("<h2 style='font-size: 20px;'>Business Metrics</h2>", unsafe_allow_html=True)
                 forward_eps = info.get('forwardEps', 'N/A')
                 forward_pe = info.get('forwardPE', 'N/A')
                 peg_ratio = info.get('pegRatio', 'N/A')
@@ -85,7 +104,7 @@ if button:
                 recommendation = info.get('recommendationKey', 'N/A')
                 
                 biz_metrics = [
-                    ("Metric", "Value"),
+                    ("Business Metrics", "Value"),
                     ("EPS (FWD)", f"{forward_eps:.2f}"),
                     ("P/E (FWD)", f"{forward_pe:.2f}"),
                     ("PEG Ratio", f"{peg_ratio:.2f}"),
