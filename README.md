@@ -1,5 +1,6 @@
 # streamlit-yfinance
-A sample [Streamlit](https://streamlit.io/) web application for retrieving a stock quote using YFinance API.
+A sample [Streamlit](https://streamlit.io/) web application for simple financial analysis of a stock ticker using YFinance API.
+
 ![streamlit-yfinance](./streamlit-yfinance.png)
 
 For a step-by-step guide to deploying on Streamlit, see [this](https://alphasec.io/build-an-interactive-python-web-app-with-streamlit/) post. To deploy on [Railway](https://railway.app/?referralCode=alphasec), click the button below.
