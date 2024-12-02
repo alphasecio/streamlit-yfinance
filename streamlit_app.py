@@ -19,6 +19,12 @@ def format_value(value):
         suffix_index += 1
     return f"${value:.1f}{suffixes[suffix_index]}"
 
+def safe_format(value, fmt="{:.2f}", fallback="N/A"):
+    try:
+        return fmt.format(value) if value is not None else fallback
+    except (ValueError, TypeError):
+        return fallback
+
 # If Submit button is clicked
 if button:
     if not ticker.strip():
@@ -33,20 +39,17 @@ if button:
                 st.subheader(f"{ticker} - {info.get('longName', 'N/A')}")
 
                 # Plot historical stock price data
-                if period == "1D":
-                    history = stock.history(period="1d", interval="1h")
-                elif period == "5D":
-                    history = stock.history(period="5d", interval="1d")
-                elif period == "1M":
-                    history = stock.history(period="1mo", interval="1d")
-                elif period == "6M":
-                    history = stock.history(period="6mo", interval="1wk")
-                elif period == "YTD":
-                    history = stock.history(period="ytd", interval="1mo")
-                elif period == "1Y":
-                    history = stock.history(period="1y", interval="1mo")
-                elif period == "5Y":
-                    history = stock.history(period="5y", interval="3mo")
+                period_map = {
+                    "1D": ("1d", "1h"),
+                    "5D": ("5d", "1d"),
+                    "1M": ("1mo", "1d"),
+                    "6M": ("6mo", "1wk"),
+                    "YTD": ("ytd", "1mo"),
+                    "1Y": ("1y", "1mo"),
+                    "5Y": ("5y", "3mo"),
+                }
+                selected_period, interval = period_map.get(period, ("1mo", "1d"))
+                history = stock.history(period=selected_period, interval=interval)
                 
                 chart_data = pd.DataFrame(history["Close"])
                 st.line_chart(chart_data)
@@ -54,66 +57,45 @@ if button:
                 col1, col2, col3 = st.columns(3)
 
                 # Display stock information as a dataframe
-                country = info.get('country', 'N/A')
-                sector = info.get('sector', 'N/A')
-                industry = info.get('industry', 'N/A')
-                market_cap = info.get('marketCap', 'N/A')
-                ent_value = info.get('enterpriseValue', 'N/A')
-                employees = info.get('fullTimeEmployees', 'N/A')
-
                 stock_info = [
                     ("Stock Info", "Value"),
-                    ("Country", country),
-                    ("Sector", sector),
-                    ("Industry", industry),
-                    ("Market Cap", format_value(market_cap)),
-                    ("Enterprise Value", format_value(ent_value)),
-                    ("Employees", employees)
+                    ("Country", info.get('country', 'N/A')),
+                    ("Sector", info.get('sector', 'N/A')),
+                    ("Industry", info.get('industry', 'N/A')),
+                    ("Market Cap", format_value(info.get('marketCap'))),
+                    ("Enterprise Value", format_value( info.get('enterpriseValue'))),
+                    ("Employees", info.get('fullTimeEmployees', 'N/A'))
                 ]
                 
-                df = pd.DataFrame(stock_info[1:], columns=stock_info[0])
+                df = pd.DataFrame(stock_info[1:], columns=stock_info[0]).astype(str)
                 col1.dataframe(df, width=400, hide_index=True)
                 
                 # Display price information as a dataframe
-                current_price = info.get('currentPrice', 'N/A')
-                prev_close = info.get('previousClose', 'N/A')
-                day_high = info.get('dayHigh', 'N/A')
-                day_low = info.get('dayLow', 'N/A')
-                ft_week_high = info.get('fiftyTwoWeekHigh', 'N/A')
-                ft_week_low = info.get('fiftyTwoWeekLow', 'N/A')
-                
                 price_info = [
                     ("Price Info", "Value"),
-                    ("Current Price", f"${current_price:.2f}"),
-                    ("Previous Close", f"${prev_close:.2f}"),
-                    ("Day High", f"${day_high:.2f}"),
-                    ("Day Low", f"${day_low:.2f}"),
-                    ("52 Week High", f"${ft_week_high:.2f}"),
-                    ("52 Week Low", f"${ft_week_low:.2f}")
+                    ("Current Price", safe_format(info.get('currentPrice'), fmt="${:.2f}")),
+                    ("Previous Close", safe_format(info.get('previousClose'), fmt="${:.2f}")),
+                    ("Day High", safe_format(info.get('dayHigh'), fmt="${:.2f}")),
+                    ("Day Low", safe_format(info.get('dayLow'), fmt="${:.2f}")),
+                    ("52 Week High", safe_format(info.get('fiftyTwoWeekHigh'), fmt="${:.2f}")),
+                    ("52 Week Low", safe_format(info.get('fiftyTwoWeekLow'), fmt="${:.2f}"))
                 ]
                 
-                df = pd.DataFrame(price_info[1:], columns=price_info[0])
+                df = pd.DataFrame(price_info[1:], columns=price_info[0]).astype(str)
                 col2.dataframe(df, width=400, hide_index=True)
 
                 # Display business metrics as a dataframe
-                forward_eps = info.get('forwardEps', 'N/A')
-                forward_pe = info.get('forwardPE', 'N/A')
-                peg_ratio = info.get('pegRatio', 'N/A')
-                dividend_rate = info.get('dividendRate', 'N/A')
-                dividend_yield = info.get('dividendYield', 'N/A')
-                recommendation = info.get('recommendationKey', 'N/A')
-                
                 biz_metrics = [
                     ("Business Metrics", "Value"),
-                    ("EPS (FWD)", f"{forward_eps:.2f}"),
-                    ("P/E (FWD)", f"{forward_pe:.2f}"),
-                    ("PEG Ratio", f"{peg_ratio:.2f}"),
-                    ("Div Rate (FWD)", f"${dividend_rate:.2f}"),
-                    ("Div Yield (FWD)", f"{dividend_yield * 100:.2f}%"),
-                    ("Recommendation", recommendation.capitalize())
+                    ("EPS (FWD)", safe_format(info.get('forwardEps'))),
+                    ("P/E (FWD)", safe_format(info.get('forwardPE'))),
+                    ("PEG Ratio", safe_format(info.get('pegRatio'))),
+                    ("Div Rate (FWD)", safe_format(info.get('dividendRate'), fmt="${:.2f}")),
+                    ("Div Yield (FWD)", safe_format(info.get('dividendYield') * 100, fmt="{:.2f}%") if info.get('dividendYield') else 'N/A'),
+                    ("Recommendation", info.get('recommendationKey', 'N/A').capitalize())
                 ]
                 
-                df = pd.DataFrame(biz_metrics[1:], columns=biz_metrics[0])
+                df = pd.DataFrame(biz_metrics[1:], columns=biz_metrics[0]).astype(str)
                 col3.dataframe(df, width=400, hide_index=True)
 
         except Exception as e:
