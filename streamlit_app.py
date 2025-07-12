@@ -91,7 +91,7 @@ if button:
                     ("P/E (FWD)", safe_format(info.get('forwardPE'))),
                     ("PEG Ratio", safe_format(info.get('pegRatio'))),
                     ("Div Rate (FWD)", safe_format(info.get('dividendRate'), fmt="${:.2f}")),
-                    ("Div Yield (FWD)", safe_format(info.get('dividendYield') * 100, fmt="{:.2f}%") if info.get('dividendYield') else 'N/A'),
+                    ("Div Yield (FWD)", safe_format(info.get('dividendYield'), fmt="{:.2f}%") if info.get('dividendYield') else 'N/A'),
                     ("Recommendation", info.get('recommendationKey', 'N/A').capitalize())
                 ]
                 
