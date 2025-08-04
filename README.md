@@ -6,6 +6,7 @@ This is a simple [Streamlit](https://streamlit.io/) web app that fetches and dis
 - Plot interactive historical price charts (1D, 5D, 1M, 6M, YTD, 1Y, 5Y)
 - Display key price metrics (current price, day high/low, 52-week high/low)
 - Show key business metrics (EPS, P/E, PEG, dividend rate & yield, recommendation)
+- Show earnings moves for last 12 quarters
 - Responsive design with data tables and interactive charts
 - No API key required—uses Yahoo Finance via `yfinance`
 
