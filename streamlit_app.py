@@ -141,8 +141,8 @@ if submit:
                     except Exception:
                         results.append({
                             "Earnings Date": earnings_date,
-                            "Price Date": "N/A",
-                            "Close % Change": "N/A"
+                            "Price Date": None,
+                            "Close % Change": None
                         })
 
                 df = pd.DataFrame(results)
@@ -159,8 +159,9 @@ if submit:
                 with col2:
                     chart_data = df.copy()
                     chart_data["Earnings Date"] = chart_data["Earnings Date"].astype(str)
-                    chart_data["Close % Change"] = chart_data["Close % Change"].apply(
-                        lambda x: float(str(x).replace("%", "")) if pd.notnull(x) else None
+                    chart_data = chart_data[chart_data["Close % Change"] != "N/A"].copy()
+                    chart_data["Close % Change"] = (
+                        chart_data["Close % Change"].str.replace("%","").astype(float)
                     )
 
                     chart = alt.Chart(chart_data).mark_bar().encode(
