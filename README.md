@@ -30,6 +30,6 @@ This is a simple [Streamlit](https://streamlit.io/) web app that fetches and dis
 
 
 ### 🚀 Deploying to Railway
-For a step-by-step guide to deploying on Streamlit, see [this](https://alphasec.io/stock-financial-analysis-with-streamlit-and-yfinance-api/) post. To deploy on [Railway](https://railway.app/?referralCode=alphasec), click the button below.
+For a step-by-step guide to deploying on Streamlit, see [this](https://alphasec.io/stock-financial-analysis-with-streamlit-and-yfinance-api/) post. To deploy on [Railway](https://railway.com/?referralCode=alphasec), click the button below.
 
-[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new/template/3D37W6?referralCode=alphasec)
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/H1p-V2?referralCode=alphasec)
